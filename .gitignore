@@ -1,0 +1,4 @@
+venv-sublimate/
+sublimate/__pycache__
+sublimate.egg-info/
+.vscode/

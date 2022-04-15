@@ -1,0 +1,7 @@
+version: "2"
+services:
+  sublimate:
+    build: .
+    volumes:
+      - ${HOME}/.trivium:/home/temp/.trivium
+      - ${PWD}:/out
