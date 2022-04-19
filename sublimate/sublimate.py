@@ -156,7 +156,7 @@ class Network:
 
         # Open the file and write the header
         f = open(fileName + ".md", "w")
-        f.write("# " + self.triviumData['diagramName'] + " Attack Traversal Report\n")
+        f.write("# " + fileName + " Attack Traversal Report\n")
         f.close()
 
         # State the attacking node
@@ -200,7 +200,7 @@ class Network:
         text = ""
         victimList = ""
         header = ('<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>\n')
-        summaryGraph = "# "+ str(self.triviumData['diagramName']) + " Attack Traversal Report {: id=top} \n## Summary Graph\n~~~mermaid\nflowchart LR\n"
+        summaryGraph = "# "+ str(fileName).split("/")[-1] + " Attack Traversal Report {: id=top} \n## Summary Graph\n~~~mermaid\nflowchart LR\n"
         summaryGraphCounter = {}
 
         # Create a set of nodes that must be listed at the end
