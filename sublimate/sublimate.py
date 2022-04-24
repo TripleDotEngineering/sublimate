@@ -4,10 +4,6 @@ import json
 import math
 import markdown
 import matplotlib.pyplot as plt
-import pdfkit
-import pandoc
-import subprocess
-import os
 import trivium
 import datetime
 
@@ -43,11 +39,6 @@ class victimNode:
             # If it is the new worst path, insert at end
             else:
                 self.compromisePaths.append(path)
-
-    def CalculateScore(self):
-
-        # Code goes here
-        return True
 
 class compromisePath:
 
@@ -91,21 +82,6 @@ class Network:
 
         self.triviumData = triviumData
 
-
-    # Init without graph for testing
-    #def __init__(self, victimNodes, attackingNode, triviumData):
-
-        # Init the attacker and the victims
-     #   self.victimNodes = []
-      #  for victim in victimNodes:
-
-            # Create a new victim node and add to list
-       #     self.victimNodes.append(victimNode(victim))
-
-#        self.attackingNode = attackingNode
-
- #       self.triviumData = triviumData
-
     def Sublimate(self, number_of_paths):
 
         def edgeWeight(u, v, w):
@@ -113,14 +89,7 @@ class Network:
             if ((score) >= 1): score /= 10 # this is for testing, to get score in [0,1]
             return -math.log2(score)
 
-        def ipToTid(ip):
-            trivium_id = [id for id,attributes in self.G.nodes.items() if attributes['ip'] == ip][0]
-            return trivium_id
-
-        def tidToIp(tid):
-            return self.G.nodes[tid]['ip']
-
-        paths = nx.all_simple_paths(self.G, source=ipToTid(self.attackingNode), target=ipToTid(self.victimNodes[0].ip))
+        paths = nx.all_simple_paths(self.G, source=self.ipToTid(self.attackingNode), target=self.ipToTid(self.victimNodes[0].ip))
 
         pathWeightPairs = []
         max_weight = float("-inf")
@@ -139,60 +108,17 @@ class Network:
 
 
         for victim in self.victimNodes:
-            trivium_id = ipToTid(victim.ip)
+            trivium_id = self.ipToTid(victim.ip)
             for p,w in pathWeightPairs:
                 w = float((w - min_weight) / (max_weight - min_weight))
                 if p[-1] != trivium_id: continue
                 path_to_victim = compromisePath()
                 path_to_victim.addToWeight(w)
-                ipPath = list(map(tidToIp, p))
+                ipPath = list(map(self.tidToIp, p))
                 path_to_victim.path = ipPath
                 victim.addPath(path_to_victim)
                 
         return True
-
-
-    def MarkdownExport(self, fileName):
-
-        # Open the file and write the header
-        f = open(fileName + ".md", "w")
-        f.write("# " + fileName + " Attack Traversal Report\n")
-        f.close()
-
-        # State the attacking node
-        f = open(fileName+".md", "a")
-        f.write("## Attacking Node: " + self.attackingNode + '\n')
-
-        # Loop through the victims
-        for victim in self.victimNodes:
-            f.write("## Victim Node: " + victim.ip + '\n')
-
-            # Edge case: if there are no paths, print notice
-            if(len(victim.compromisePaths) == 0):
-                f.write('#### No Paths of Compromise for This Node\n')
-
-            else:
-
-                # For each victim, loop through the paths and print them
-                for compromisePath in victim.compromisePaths:
-
-                    # print the markdown formatting
-                    f.write("#### ")
-
-                    # loop through the ips in the path and print arrows between them
-                    for ip in compromisePath.path:
-                        f.write(ip)
-                        f.write("->")
-
-                    # At the end output the ip of the victim node
-                    f.write(victim.ip + '\n')
-
-                    # Output the weight and number of nodes
-                    f.write("**Weight of Path:** {:.6f}\n\n".format(compromisePath.weight))
-                    f.write("**Number of Nodes in Path:** " + str(len(compromisePath.path) + 1) + "\n\n")
-
-
-        f.close()
 
     def MermaidExport(self, fileName):
 
@@ -214,7 +140,7 @@ class Network:
             text += ("## Victim Node: [" + victim.ip + "](#" + victim.ip + ')\n\n')
 
             # Edge case: if there are no paths, print notice
-            if(len(victim.compromisePaths) == 0):
+            if len(victim.compromisePaths) == 0:
                 text += '#### No Paths of Compromise for This Node\n\n'
 
             else:
@@ -248,11 +174,6 @@ class Network:
 
                         summaryGraphCounter[compromisePath.path[i+1]] += 1
 
-                    # At the end output the path to the victim node
-                    # temp += compromisePath.path[len(compromisePath.path)-1]
-                    # temp += "-->"
-                    # temp += (victim.ip + '\n')
-
                     # Attach the temp graph to the diagram in both places
                     text += temp
                     summaryGraph += temp
@@ -260,8 +181,6 @@ class Network:
                     # Output the weight and number of nodes
                     text += "~~~\n\n#### Weight of Path: {:.6f}\n\n".format(compromisePath.weight)
                     text += "#### Number of Nodes in Path: " + str(len(compromisePath.path) + 1) + "\n\n"
-
-
 
         # Create the list of effected nodes
         for listedNode in listedNodes:
@@ -272,10 +191,6 @@ class Network:
 
             for cve in cves:
                 victimList += "["+cve+"](https://cve.mitre.org/cgi-bin/cvename.cgi?name="+cve+")\n\n"
-
-
-
-        # Finish formatting the summary graph
 
         # Find the node with the highest weight
         if len(summaryGraphCounter) != 0:
@@ -311,6 +226,9 @@ class Network:
     def ipToTid(self, ip):
         trivium_id = [id for id,attributes in self.G.nodes.items() if attributes['ip'] == ip][0]
         return trivium_id
+
+    def tidToIp(self, tid):
+        return self.G.nodes[tid]['ip']
 
 
 # Testing zone
