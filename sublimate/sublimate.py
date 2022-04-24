@@ -92,33 +92,7 @@ class Network:
         self.triviumData = triviumData
 
 
-    # Init without graph for testing
-    #def __init__(self, victimNodes, attackingNode, triviumData):
-
-        # Init the attacker and the victims
-     #   self.victimNodes = []
-      #  for victim in victimNodes:
-
-            # Create a new victim node and add to list
-       #     self.victimNodes.append(victimNode(victim))
-
-#        self.attackingNode = attackingNode
-
- #       self.triviumData = triviumData
-
     def Sublimate(self, number_of_paths):
-
-        def edgeWeight(u, v, w):
-            score = float(self.G.nodes[v]['distill_score'])
-            if ((score) >= 1): score /= 10 # this is for testing, to get score in [0,1]
-            return -math.log2(score)
-
-        def ipToTid(ip):
-            trivium_id = [id for id,attributes in self.G.nodes.items() if attributes['ip'] == ip][0]
-            return trivium_id
-
-        def tidToIp(tid):
-            return self.G.nodes[tid]['ip']
 
         paths = nx.all_simple_paths(self.G, source=ipToTid(self.attackingNode), target=ipToTid(self.victimNodes[0].ip))
 
@@ -307,10 +281,14 @@ class Network:
         f.close()
 
 
-    # Utilies
+    # Utilities
     def ipToTid(self, ip):
         trivium_id = [id for id,attributes in self.G.nodes.items() if attributes['ip'] == ip][0]
         return trivium_id
+    
+    
+    def tidToIp(tid):
+        return self.G.nodes[tid]['ip']
 
 
 # Testing zone
