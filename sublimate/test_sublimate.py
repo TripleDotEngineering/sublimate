@@ -46,13 +46,13 @@ def test_complete_graphs():
 def test_find_0_paths():
     with open('./test_data/demo_graph.json', 'r') as f:
         data = f.read()
-    network = Network(data, ['212.209.235.224'], '135.22.112.220', {'diagramName': 'disconnected_graph'})
+    network = Network(data, ['212.209.235.224'], '135.22.112.220', {'diagramName': 'demo_graph'})
     network.Sublimate(0)
     assert len(network.victimNodes[0].compromisePaths) == 0
 
 def test_demo_graph():
     with open('./test_data/demo_graph.json', 'r') as f:
         data = f.read()
-    network = Network(data, ['212.209.235.224'], '135.22.112.220', {'diagramName': 'disconnected_graph'})
+    network = Network(data, ['212.209.235.224'], '135.22.112.220', {'diagramName': 'demo_graph'})
     network.Sublimate(2)
     assert len(network.victimNodes[0].compromisePaths) == 2

@@ -109,7 +109,7 @@ class Network:
             if weight < min_weight:
                 min_weight = weight
 
-        heapq.nlargest(number_of_paths, pathWeightPairs, key=lambda p: p[1])
+        pathWeightPairs = heapq.nlargest(number_of_paths, pathWeightPairs, key=lambda p: p[1])
 
 
         for victim in self.victimNodes:
