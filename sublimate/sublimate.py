@@ -6,6 +6,7 @@ import markdown
 import matplotlib.pyplot as plt
 import trivium
 import datetime
+import heapq
 
 
 
@@ -82,12 +83,8 @@ class Network:
 
         self.triviumData = triviumData
 
-    def Sublimate(self, number_of_paths):
 
-        def edgeWeight(u, v, w):
-            score = float(self.G.nodes[v]['distill_score'])
-            if ((score) >= 1): score /= 10 # this is for testing, to get score in [0,1]
-            return -math.log2(score)
+    def Sublimate(self, number_of_paths):
 
         paths = nx.all_simple_paths(self.G, source=self.ipToTid(self.attackingNode), target=self.ipToTid(self.victimNodes[0].ip))
 
@@ -103,14 +100,13 @@ class Network:
             if weight < min_weight:
                 min_weight = weight
 
-        pathWeightPairs.sort(key=lambda p: p[1], reverse=True)
-        pathWeightPairs = pathWeightPairs[:number_of_paths]
+        pathWeightPairs = heapq.nlargest(number_of_paths, pathWeightPairs, key=lambda p: p[1])
 
 
         for victim in self.victimNodes:
             trivium_id = self.ipToTid(victim.ip)
             for p,w in pathWeightPairs:
-                w = float((w - min_weight) / (max_weight - min_weight))
+                w = float((w - min_weight) / ((max_weight - min_weight) or 1))
                 if p[-1] != trivium_id: continue
                 path_to_victim = compromisePath()
                 path_to_victim.addToWeight(w)
@@ -168,7 +164,7 @@ class Network:
                         listedNodes.add(compromisePath.path[i+1])
 
 
-                        # Add one occurence to the node that is being accessed for the summaryGraph
+                        # Add one occurrence to the node that is being accessed for the summaryGraph
                         if not compromisePath.path[i+1] in summaryGraphCounter:
                             summaryGraphCounter[compromisePath.path[i+1]] = 0
 
@@ -222,10 +218,14 @@ class Network:
         f.close()
 
 
-    # Utilies
+    # Utilities
     def ipToTid(self, ip):
         trivium_id = [id for id,attributes in self.G.nodes.items() if attributes['ip'] == ip][0]
         return trivium_id
+    
+    
+    def tidToIp(self, tid):
+        return self.G.nodes[tid]['ip']
 
     def tidToIp(self, tid):
         return self.G.nodes[tid]['ip']
@@ -241,7 +241,7 @@ def main():
     parser.add_argument("-m", "--model", type=str, help="Model Name")
     parser.add_argument("-d", "--diagram", type=str, help="Diagram Name")
     parser.add_argument("-i", "--input", type=str, help="Input ", required=True)
-    parser.add_argument("-o", "--output", type=str, help="Nessus Files", required=True)
+    parser.add_argument("-o", "--output", type=str, help="HTML report file name", required=True)
     parser.add_argument("-a", "--attacker", type=str, help="Override attacking nodes from diagram")
     parser.add_argument("-v", "--victim", type=str, help="Override victim nodes from diagram")
     parser.add_argument("-n", "--number_paths", type=int, help="Quantity of top N paths to display")
