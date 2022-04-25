@@ -64,4 +64,4 @@ def test_demo_graph():
     assert (len(paths) == 3 
         and math.isclose(paths[0].weight, 1)
         and math.isclose(paths[1].weight, 0.22948468672526573)
-        and math.isclose(paths[0].weight, 1))
+        and math.isclose(paths[2].weight, 0))
