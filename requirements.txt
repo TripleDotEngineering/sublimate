@@ -8,7 +8,7 @@ importlib-metadata==4.11.3
 isort==5.10.1
 kiwisolver==1.4.2
 lazy-object-proxy==1.7.1
-lxml==4.7.1
+lxml==4.9.1
 Markdown==3.3.6
 matplotlib==3.5.1
 mccabe==0.6.1
